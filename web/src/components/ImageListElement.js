@@ -81,56 +81,51 @@ export default function ImageListElement(props) {
       <Link
         href={"/content/" + props.item.slug.current}
         key={props.item.slug.current}
+        className="listItem"
       >
-        <div className="listItem">
-          <div className="listItemImage">
-            {props.item.mainImage ? (
-              <img
-                src={optimizeImageLoading(props.item.mainImage.asset.url)}
-                loading="lazy"
-                alt={props.item.title}
-              />
-            ) : // TODO: better (more robust) check for this
-            props.item.images && props.item.images[0] ? (
-              <img
-                src={optimizeImageLoading(props.item.images[0].asset.url)}
-                loading="lazy"
-                alt={props.item.title}
-              />
-            ) : null}
-          </div>
-          <div>
-            <h3 sx={{ variant: "styles.h3" }} style={{ color: headerColor }}>
-              {props.home && (
-                <React.Fragment>
-                  {" "}
-                  <i>Art •</i>
-                </React.Fragment>
-              )}
+        <div className="listItemImage">
+          {props.item.mainImage ? (
+            <img
+              src={optimizeImageLoading(props.item.mainImage.asset.url)}
+              loading="lazy"
+              alt={props.item.title}
+            />
+          ) : // TODO: better (more robust) check for this
+          props.item.images && props.item.images[0] ? (
+            <img
+              src={optimizeImageLoading(props.item.images[0].asset.url)}
+              loading="lazy"
+              alt={props.item.title}
+            />
+          ) : null}
+        </div>
+        <div>
+          <h3 sx={{ variant: "styles.h3" }} style={{ color: headerColor }}>
+            {props.home && (
+              <React.Fragment>
+                {" "}
+                <i>Art •</i>
+              </React.Fragment>
+            )}
 
-              <i> {props.item.issue.title}</i>
-              <div className="fontMod">
-
+            <i> {props.item.issue.title}</i>
+          </h3>
+          <h2 sx={{ variant: "styles.h2" }}>
+            <span className="fontMod">{props.item.title}</span>
+          </h2>
+        </div>
+        <div>
+          {"authors" in props.item &&
+            (props.hideAuthor ? (
+              ""
+            ) : (
+              <div className="authorName">
+                <p sx={{ variant: "styles.p" }}>
+                  By{" "}
+                  {props.item.authors.map(({ name }) => name).join(", ")}
+                </p>
               </div>
-            </h3>
-            <h2 sx={{ variant: "styles.h2" }}><div className="fontMod">{props.item.title}</div></h2>
-          </div>
-          <div>
-            {"authors" in props.item &&
-              (props.hideAuthor ? (
-                ""
-              ) : (
-                <div className="authorName">
-                  <p sx={{ variant: "styles.p" }}>
-                    By{" "}
-                    {
-                      //TODO: link to author page
-                    }
-                    {props.item.authors.map(({ name }) => name).join(", ")}
-                  </p>
-                </div>
-              ))}
-          </div>
+            ))}
         </div>
       </Link>
     </div>

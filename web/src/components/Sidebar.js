@@ -1,5 +1,5 @@
 /** @jsxImportSource theme-ui */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Grid } from "theme-ui";
 import { theme } from "../theme/theme.js";
@@ -224,6 +224,7 @@ export default function Sidebar() {
 
 
   const isMobile = useIsMobile();
+  const [hasMounted, setHasMounted] = useState(false);
   const [sectionsExpanded, setSectionsExpanded] = useState(() =>
     [
       "/sections/art",
@@ -253,10 +254,16 @@ export default function Sidebar() {
     return router.asPath === pathname ? " highlight" : "";
   };
 
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  const showMobileLayout = hasMounted && isMobile;
+
   return (
     <div sx={sidebarSx}>
       <Grid className="sidebar" columns={1} gap={3}>
-        {isMobile ? (
+        {showMobileLayout ? (
 
           // mobile display
           <div className="headerGrid">
@@ -274,15 +281,11 @@ export default function Sidebar() {
               onClick={() => setNavbarExpanded(false)}
             >
               {/* <img src="/logo2.jpg" alt="The Advocate Logo" /> */}
-              <div className="advoStyle">
-
-
-                <div className="fontMod">
-                <img src="/wordmark.png" alt="The Advocate Title" />
-
-                {/* THE HARVARD ADVOCATE */}
-                  </div>
-                </div>
+              <span className="advoStyle">
+                <span className="fontMod">
+                  <img src="/wordmark.png" alt="The Advocate Title" />
+                </span>
+              </span>
             </Link>
           </div>
         ) : (
@@ -307,7 +310,7 @@ export default function Sidebar() {
             marginRight: 0,
           }}
         ></div>
-        {(navbarExpanded || !isMobile) && (
+        {(navbarExpanded || !showMobileLayout) && (
           <div className="linksToShow">
             <Link
               className={`link ${highlightLink("/")}`}
@@ -332,7 +335,7 @@ export default function Sidebar() {
             </Link>
 
 
-            {isMobile ? (
+            {showMobileLayout ? (
               <Link
                 className={`link ${highlightLink("/submit")}`}
                 href="/submit"
@@ -346,6 +349,13 @@ export default function Sidebar() {
             ) : (
               ""
             )}
+            <Link
+              className={`link ${highlightLink("/blog")}`}
+              href={"/blog"}
+              onClick={() => setNavbarExpanded(false)}
+            >
+              Blog
+            </Link>
             <div className="sectionsLink">
               <Link
                 className={`link ${highlightLink("/sections")}`}
@@ -464,7 +474,7 @@ export default function Sidebar() {
                     Masthead
                 </a>
 
-                {isMobile ? (
+                {showMobileLayout ? (
                 <a
                   className={`link`}
                   href="https://alumni.theharvardadvocate.com"
@@ -516,15 +526,15 @@ export default function Sidebar() {
 
 
         <Link className="buttonLink" href={"/submit"}>
-        <div className="fontButtonMod">
+        <span className="fontButtonMod">
           SUBMIT
-        </div>
+        </span>
         </Link>
 
         <Link className="buttonLink" href={"/subscribe"}>
-        <div className="fontButtonMod">
+        <span className="fontButtonMod">
           SUBSCRIBE
-        </div>
+        </span>
         </Link>
         
       </Grid>

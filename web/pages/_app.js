@@ -54,7 +54,7 @@ function MyApp({ Component, pageProps }) {
         <div css={appSx}>
           <Sidebar />
           <div className="nonSidebarContent">
-            <Component {...pageProps} />
+            <Component key={router.asPath} {...pageProps} />
             <Footer />
           </div>
         </div>

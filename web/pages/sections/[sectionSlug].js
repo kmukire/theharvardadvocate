@@ -166,40 +166,61 @@ export default function Section({ initialItems, sectionTitle, sectionSlug }) {
 }
 
 export async function getStaticPaths() {
-  const slugs = await sanityClient.fetch(
-    `*[_type == "section"].slug.current`
-  );
+  try {
+    const slugs = await sanityClient.fetch(
+      `*[_type == "section"].slug.current`
+    );
 
-  const paths = slugs.map((sectionSlug) => ({
-    params: { sectionSlug },
-  }));
+    const paths = slugs.map((sectionSlug) => ({
+      params: { sectionSlug },
+    }));
 
-  return {
-    paths,
-    fallback: 'blocking',
-  };
+    return {
+      paths,
+      fallback: 'blocking',
+    };
+  } catch (error) {
+    console.error("Failed to fetch section slugs from Sanity:", error);
+
+    return {
+      paths: [],
+      fallback: 'blocking',
+    };
+  }
 }
 
 export async function getStaticProps({ params }) {
-  const sectionData = await sanityClient.fetch(
-    `*[_type == "section" && slug.current == $sectionSlug][0]`,
-    { sectionSlug: params.sectionSlug }
-  );
+  try {
+    const sectionData = await sanityClient.fetch(
+      `*[_type == "section" && slug.current == $sectionSlug][0]`,
+      { sectionSlug: params.sectionSlug }
+    );
 
-  if (!sectionData) {
-    return { notFound: true };
+    if (!sectionData) {
+      return { notFound: true };
+    }
+
+    const items = await sanityClient.fetch(
+      sectionToQuery(sectionData.title, 0, 99)
+    );
+
+    return {
+      props: {
+        initialItems: items,
+        sectionTitle: sectionData.title,
+        sectionSlug: params.sectionSlug,
+      },
+      revalidate: 86400,
+    };
+  } catch (error) {
+    console.error(
+      `Failed to fetch section data for slug "${params.sectionSlug}":`,
+      error
+    );
+
+    return {
+      notFound: true,
+      revalidate: 300,
+    };
   }
-
-  const items = await sanityClient.fetch(
-    sectionToQuery(sectionData.title, 0, 99)
-  );
-
-  return {
-    props: {
-      initialItems: items,
-      sectionTitle: sectionData.title,
-      sectionSlug: params.sectionSlug,
-    },
-    revalidate: 86400,
-  };
 }

@@ -47,7 +47,9 @@ const bioComponents = {
   marks: {
     em: ({ children }) => <em>{children}</em>,
     strong: ({ children }) => <strong>{children}</strong>,
-    center: ({ children }) => <div style={{ textAlign: 'center' }}>{children}</div>,
+    center: ({ children }) => (
+      <span style={{ display: "block", textAlign: "center" }}>{children}</span>
+    ),
     link: ({ value, children }) => {
       const target = (value?.href || "").startsWith("http") ? "_blank" : undefined;
       return (
@@ -187,46 +189,75 @@ export default function Author({ authorData, authoredItems, sections }) {
 }
 
 export async function getStaticPaths() {
-  const slugs = await sanityClient.fetch(
-    `*[_type == "author"].slug.current`
-  );
+  try {
+    const slugs = await sanityClient.fetch(
+      `*[_type == "author"].slug.current`
+    );
 
-  const paths = slugs.map((authorSlug) => ({
-    params: { authorSlug },
-  }));
+    const paths = slugs.map((authorSlug) => ({
+      params: { authorSlug },
+    }));
 
-  return {
-    paths,
-    fallback: 'blocking',
-  };
+    return {
+      paths,
+      fallback: 'blocking',
+    };
+  } catch (error) {
+    console.error("Failed to fetch author slugs from Sanity:", error);
+
+    return {
+      paths: [],
+      fallback: 'blocking',
+    };
+  }
 }
 
 export async function getStaticProps({ params }) {
-  const data = await sanityClient.fetch(
-    `*[_type == "author" && slug.current == $authorSlug]{
-       _id,
-       name,
-       slug,
-       image,
-       bio,
-      "itemData": *[_type == "contentItem" && ^._id in authors[]._ref]{title, body, slug, authors[]->{name, slug}, issue->{title, slug}, sections[]->{title, slug}, images[]{asset->{_id, url}}, mainImage{asset->{_id,url}}}}[0]`,
-    { authorSlug: params.authorSlug }
-  );
+  try {
+    const data = await sanityClient.fetch(
+      `*[_type == "author" && slug.current == $authorSlug]{
+         _id,
+         name,
+         slug,
+         image,
+         bio,
+        "itemData": *[_type == "contentItem" && ^._id in authors[]._ref]{title, body, slug, authors[]->{name, slug}, issue->{title, slug}, sections[]->{title, slug}, images[]{asset->{_id, url}}, mainImage{asset->{_id,url}}}}[0]`,
+      { authorSlug: params.authorSlug }
+    );
 
-  if (!data) {
-    return { notFound: true };
+    if (!data) {
+      return { notFound: true };
+    }
+
+    const authorData = {
+      _id: data._id,
+      name: data.name,
+      slug: data.slug,
+      image: data.image,
+      bio: data.bio,
+    };
+    const authoredItems = data.itemData || [];
+    const sections = authoredItems.length
+      ? unionBy(...authoredItems.map((item) => item.sections), "title")
+      : [];
+
+    return {
+      props: {
+        authorData,
+        authoredItems,
+        sections,
+      },
+      revalidate: 86400,
+    };
+  } catch (error) {
+    console.error(
+      `Failed to fetch author data for slug "${params.authorSlug}":`,
+      error
+    );
+
+    return {
+      notFound: true,
+      revalidate: 300,
+    };
   }
-
-  const authorData = { _id: data._id, name: data.name, slug: data.slug, image: data.image, bio: data.bio };
-  const authoredItems = data.itemData;
-  const sections = unionBy(...authoredItems.map((item) => item.sections), "title");
-
-  return {
-    props: {
-      authorData,
-      authoredItems,
-      sections,
-    },
-    revalidate: 86400,
-  };
 }

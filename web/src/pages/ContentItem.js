@@ -87,7 +87,11 @@ const customComponents = {
   marks: {
     em: ({ children }) => <em>{children}</em>,
     strong: ({ children }) => <strong>{children}</strong>,
-    center: ({ children }) => <div className="centerText">{children}</div>,
+    center: ({ children }) => (
+      <span className="centerText" style={{ display: "block", textAlign: "center" }}>
+        {children}
+      </span>
+    ),
     link: ({ value, children }) => {
       const target = (value?.href || "").startsWith("http")
         ? "_blank"

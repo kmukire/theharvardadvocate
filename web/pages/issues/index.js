@@ -189,40 +189,58 @@ const allIssuesQuery = () =>
       }`;
 
 export async function getStaticProps() {
-  const data = await sanityClient.fetch(
-    `{
-      "itemData": ${allIssuesQuery()},
-      "featuredItems": *[_type == "contentItem" && "newIssueFeatured" in featuredOptions]  | order(publishedAt desc) {
-          title,
-          authors[]->{name, slug},
-          issue->{title, slug},
-          slug,
-          mainImage{
-            asset->{
-            _id,
-            url
+  try {
+    const data = await sanityClient.fetch(
+      `{
+        "itemData": ${allIssuesQuery()},
+        "featuredItems": *[_type == "contentItem" && "newIssueFeatured" in featuredOptions]  | order(publishedAt desc) {
+            title,
+            authors[]->{name, slug},
+            issue->{title, slug},
+            slug,
+            mainImage{
+              asset->{
+              _id,
+              url
+            }
           }
         }
-      }
-    }`
-  );
+      }`
+    );
 
-  const featuredItems = data.featuredItems.filter(
-    (item) => item.issue && item.issue.title === data.itemData[0].title
-  );
+    const issueData = data.itemData || [];
+    const featuredItems = issueData[0]
+      ? data.featuredItems.filter(
+          (item) => item.issue && item.issue.title === issueData[0].title
+        )
+      : [];
 
-  const featuredItems2 = data.featuredItems.filter(
-    (item) => item.issue && item.issue.title === data.itemData[1].title
-  );
+    const featuredItems2 = issueData[1]
+      ? data.featuredItems.filter(
+          (item) => item.issue && item.issue.title === issueData[1].title
+        )
+      : [];
 
-  return {
-    props: {
-      initialItemData: data.itemData,
-      initialFeaturedItems: featuredItems,
-      initialFeaturedItems2: featuredItems2,
-    },
-    revalidate: 86400,
-  };
+    return {
+      props: {
+        initialItemData: issueData,
+        initialFeaturedItems: featuredItems,
+        initialFeaturedItems2: featuredItems2,
+      },
+      revalidate: 86400,
+    };
+  } catch (error) {
+    console.error("Failed to fetch issues index data from Sanity:", error);
+
+    return {
+      props: {
+        initialItemData: [],
+        initialFeaturedItems: [],
+        initialFeaturedItems2: [],
+      },
+      revalidate: 300,
+    };
+  }
 }
 
 export default function IssuesList({ initialItemData, initialFeaturedItems, initialFeaturedItems2 }) {
@@ -234,6 +252,27 @@ export default function IssuesList({ initialItemData, initialFeaturedItems, init
 
   if (!itemData || !featuredItems) {
     return <ColorRingLoader />;
+  }
+
+  if (itemData.length < 2) {
+    return (
+      <div css={issuesListSx}>
+        <Head>
+          <title>Issues - The Harvard Advocate</title>
+          <meta
+            name="description"
+            property="og:description"
+            content="Issue archive temporarily unavailable."
+          />
+        </Head>
+        <div className="horizontalContainer">
+          <div className="mainContent">
+            <h1>Issues</h1>
+            <p>The issue archive is temporarily unavailable. Please try again shortly.</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   var perChunk = 4; // items per row
@@ -276,8 +315,11 @@ export default function IssuesList({ initialItemData, initialFeaturedItems, init
                     <div className="bigGridRow">
                       {issueSlices.map((bigIssue) => {
                         return (
-                          <Link href={"/issues/" + bigIssue.slug.current}>
-                            <div className="bigIssueDiv" key={bigIssue.title}>
+                          <Link
+                            href={"/issues/" + bigIssue.slug.current}
+                            className="bigIssueDiv"
+                            key={bigIssue.title}
+                          >
                               <div className="issueCover">
                                 <img
                                   src={optimizeImageLoading(
@@ -289,13 +331,10 @@ export default function IssuesList({ initialItemData, initialFeaturedItems, init
                               </div>
                               <div className="lowerInfo">
                                 <h3 sx={{ variant: "styles.h3" }}>{bigIssue.title}</h3>
-                                <Link href={"/issues/" + bigIssue.slug.current}>
-                                  <div className="readFullIssueBig">
-                                    <span>&#8594;</span>&nbsp;
-                                  </div>
-                                </Link>
+                                <span className="readFullIssueBig">
+                                  <span>&#8594;</span>&nbsp;
+                                </span>
                               </div>
-                            </div>
                           </Link>
                         );
                       })}
@@ -313,8 +352,11 @@ export default function IssuesList({ initialItemData, initialFeaturedItems, init
                 <div key={index} className="smallGridRow">
                   {issueSlices.map((smallIssue) => {
                     return (
-                      <Link href={"/issues/" + smallIssue.slug.current}>
-                        <div className="smallIssueDiv" key={smallIssue.title}>
+                      <Link
+                        href={"/issues/" + smallIssue.slug.current}
+                        className="smallIssueDiv"
+                        key={smallIssue.title}
+                      >
                           <img
                             src={optimizeImageLoading(
                               smallIssue.frontCover.asset.url
@@ -325,7 +367,6 @@ export default function IssuesList({ initialItemData, initialFeaturedItems, init
                           <div className="lowerInfo2">
                             <h4 sx={{ variant: "styles.h4" }}>{smallIssue.title}</h4>
                           </div>
-                        </div>
                       </Link>
                     );
                   })}

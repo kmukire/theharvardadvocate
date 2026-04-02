@@ -1,5 +1,5 @@
 /** @jsxImportSource theme-ui */
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useIsMobile } from "../utils/isMobile.js";
 import { FaTwitter, FaInstagram } from "react-icons/fa";
@@ -103,6 +103,13 @@ const footerSx = {
 
 export default function Footer() {
   var isMobile = useIsMobile();
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  const showMobileLayout = hasMounted && isMobile;
 
   return (
     <div sx={footerSx}>
@@ -122,7 +129,10 @@ export default function Footer() {
           <br />
           <Link className="linkLogo" href={"/"}>
             <img src="/logo.svg" alt="The Advocate Logo" loading="lazy" />
-            {new Date().getFullYear()} &nbsp; <span>&copy;</span> &nbsp; The Harvard Advocate
+            <span suppressHydrationWarning>
+              {new Date().getFullYear()}
+            </span>
+            &nbsp; <span>&copy;</span> &nbsp; The Harvard Advocate
           </Link>
         </div>
         <div className="socialIcons">
@@ -143,7 +153,7 @@ export default function Footer() {
             <FaInstagram />
           </a>
         </div>
-        {isMobile ? (
+        {showMobileLayout ? (
           ""
         ) : (
           <div className="sectionsAndMore">

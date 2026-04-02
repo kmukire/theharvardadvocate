@@ -85,24 +85,38 @@ const sectionToUrl = (section) => {
 };
 
 export async function getStaticProps() {
-  const data = await sanityClient.fetch(
-    `{
-      "artItems": ${sectionToQuery("Art")},
-      "fictionItems": ${sectionToQuery("Fiction")},
-      "featuresItems": ${sectionToQuery("Features")},
-      "poetryItems": ${sectionToQuery("Poetry")}
-    }`
-  );
+  try {
+    const data = await sanityClient.fetch(
+      `{
+        "artItems": ${sectionToQuery("Art")},
+        "fictionItems": ${sectionToQuery("Fiction")},
+        "featuresItems": ${sectionToQuery("Features")},
+        "poetryItems": ${sectionToQuery("Poetry")}
+      }`
+    );
 
-  return {
-    props: {
-      artItems: data.artItems,
-      fictionItems: data.fictionItems,
-      featuresItems: data.featuresItems,
-      poetryItems: data.poetryItems,
-    },
-    revalidate: 86400,
-  };
+    return {
+      props: {
+        artItems: data.artItems || [],
+        fictionItems: data.fictionItems || [],
+        featuresItems: data.featuresItems || [],
+        poetryItems: data.poetryItems || [],
+      },
+      revalidate: 86400,
+    };
+  } catch (error) {
+    console.error("Failed to fetch sections overview data from Sanity:", error);
+
+    return {
+      props: {
+        artItems: [],
+        fictionItems: [],
+        featuresItems: [],
+        poetryItems: [],
+      },
+      revalidate: 300,
+    };
+  }
 }
 
 export default function SectionsOverview({ artItems, fictionItems, featuresItems, poetryItems }) {

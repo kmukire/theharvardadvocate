@@ -232,32 +232,29 @@ export default function FeaturedIssue(props) {
           <div
             className={props.newest ? "featuredArticles" : "featuredArticles2"}
           >
-            <a href={"issues/" + issue.slug.current}>
-              <div className="issueTitle">
-                <h5 sx={{ variant: "styles.h5" }}>
-                  <div className="fontMod">
+            <Link href={"/issues/" + issue.slug.current} className="issueTitle">
+              <h5 sx={{ variant: "styles.h5" }}>
+                <span className="fontMod">
                   <b>{props.newest ? "NEWEST ISSUE" : "RECENT ISSUE"}</b>
-                  </div>
-                </h5>
-                <h1 sx={{ variant: "styles.h1" }}>{issue.title}</h1>
-                {featuredItems.length > 0 ? <hr /> : <></>}
-              </div>
-            </a>
+                </span>
+              </h5>
+              <h1 sx={{ variant: "styles.h1" }}>{issue.title}</h1>
+              {featuredItems.length > 0 ? <hr /> : <></>}
+            </Link>
             <div className="highlightedArticles">
               <Grid gap={6} columns={[1, null, 2]} className="featuredGrid">
                 {featuredItems.slice(0, 2).map((article) => {
                   return (
                     <div className="featuredArticle" key={article.title}>
-                      <Link href={"/content/" + article.slug.current}>
-                        <div className="articleLink">
-                          {/* <div className="fontMod"> */}
-                          <b>{article.title}</b> <br />
-                          {/* </div> */}
-                          <h3 sx={{ variant: "styles.h3" }}>
-                            By{" "}{article.authors[0].name}
-                            {article.authors.length > 1 ? ", ..." : ""}
-                          </h3>
-                        </div>
+                      <Link
+                        href={"/content/" + article.slug.current}
+                        className="articleLink"
+                      >
+                        <b>{article.title}</b> <br />
+                        <h3 sx={{ variant: "styles.h3" }}>
+                          By{" "}{article.authors[0].name}
+                          {article.authors.length > 1 ? ", ..." : ""}
+                        </h3>
                       </Link>
                     </div>
                   );
@@ -292,22 +289,19 @@ export default function FeaturedIssue(props) {
               {featuredItems.length > 0 ? <hr /> : <></>}
             </div>
             <div className="buttonContainer">
-            <Link href={"/issues/" + issue.slug.current}>
-              <div
+              <Link
+                href={"/issues/" + issue.slug.current}
                 className={props.newest ? "readFullIssue" : "readFullIssue2"}
               >
                 <span>&#8594;</span>
-                <h6 sx={{ variant: "styles.h6" }}><div className="fontMod">READ FULL ISSUE</div></h6>
-              </div>
-            </Link>
-             <Link href={"/shop"}>
-              <div className="buyIssueButton">
-                <div className="fontMod">
-                BUY ISSUE
-                </div>
-              </div>
-            </Link>
-          </div>
+                <h6 sx={{ variant: "styles.h6" }}>
+                  <span className="fontMod">READ FULL ISSUE</span>
+                </h6>
+              </Link>
+              <Link href={"/shop"} className="buyIssueButton">
+                <span className="fontMod">BUY ISSUE</span>
+              </Link>
+            </div>
           </div>
 
           {!props.newest && !isMobile ? (

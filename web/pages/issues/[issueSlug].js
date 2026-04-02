@@ -306,56 +306,77 @@ export default function Issue({ issue, items, sections }) {
 }
 
 export async function getStaticPaths() {
-  const slugs = await sanityClient.fetch(
-    `*[_type == "issue"].slug.current`
-  );
+  try {
+    const slugs = await sanityClient.fetch(
+      `*[_type == "issue"].slug.current`
+    );
 
-  const paths = slugs.map((issueSlug) => ({
-    params: { issueSlug },
-  }));
+    const paths = slugs.map((issueSlug) => ({
+      params: { issueSlug },
+    }));
 
-  return {
-    paths,
-    fallback: 'blocking',
-  };
+    return {
+      paths,
+      fallback: 'blocking',
+    };
+  } catch (error) {
+    console.error("Failed to fetch issue slugs from Sanity:", error);
+
+    return {
+      paths: [],
+      fallback: 'blocking',
+    };
+  }
 }
 
 export async function getStaticProps({ params }) {
-  const issueData = await sanityClient.fetch(
-    `*[_type == "issue" && slug.current == $issueSlug]{
-        frontCover{
-          asset->{
-            _id,
-            url
-          }
-        },
-        publishedAt,
-        slug,
-        title,
-        _createdAt,
-        _id,
-        _rev,
-        _type,
-        _updatedAt,
-      "itemData": *[_type == "contentItem" && ^._id == issue._ref]{title, body, slug, authors[]->{name, slug}, sections[]->{title, slug}, images[]{asset->{_id, url}}, issue->{title, slug}, mainImage{asset->{_id,url}}}}[0]`,
-    { issueSlug: params.issueSlug }
-  );
+  try {
+    const issueData = await sanityClient.fetch(
+      `*[_type == "issue" && slug.current == $issueSlug]{
+          frontCover{
+            asset->{
+              _id,
+              url
+            }
+          },
+          publishedAt,
+          slug,
+          title,
+          _createdAt,
+          _id,
+          _rev,
+          _type,
+          _updatedAt,
+        "itemData": *[_type == "contentItem" && ^._id == issue._ref]{title, body, slug, authors[]->{name, slug}, sections[]->{title, slug}, images[]{asset->{_id, url}}, issue->{title, slug}, mainImage{asset->{_id,url}}}}[0]`,
+      { issueSlug: params.issueSlug }
+    );
 
-  if (!issueData) {
-    return { notFound: true };
+    if (!issueData) {
+      return { notFound: true };
+    }
+
+    const itemData = issueData.itemData || [];
+    const sections = itemData.length
+      ? unionBy(...itemData.map((item) => item.sections), "title")
+      : [];
+
+    return {
+      props: {
+        issue: issueData,
+        items: itemData,
+        sections,
+      },
+      revalidate: 86400,
+    };
+  } catch (error) {
+    console.error(
+      `Failed to fetch issue data for slug "${params.issueSlug}":`,
+      error
+    );
+
+    return {
+      notFound: true,
+      revalidate: 300,
+    };
   }
-
-  const sections = unionBy(
-    ...issueData.itemData.map((item) => item.sections),
-    "title"
-  );
-
-  return {
-    props: {
-      issue: issueData,
-      items: issueData.itemData,
-      sections,
-    },
-    revalidate: 86400,
-  };
 }

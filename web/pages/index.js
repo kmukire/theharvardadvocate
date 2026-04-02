@@ -1,5 +1,5 @@
 /** @jsxImportSource theme-ui */
-import React, { useState } from "react";
+import React from "react";
 import { NextSeo } from 'next-seo';
 import { sanityClient } from "../lib/sanity.js";
 import { getResources } from "../lib/queries/homepage.js";
@@ -8,7 +8,6 @@ import FeaturedIssue from "../src/components/FeaturedIssue.js";
 import MixedGrid from "../src/components/MixedGrid.js";
 import TextContentList from "../src/components/TextContentList.js";
 import { useIsMobile } from "../lib/utils/isMobile.js";
-import RandomUpdate from "../src/components/RandomUpdate.js";
 import { createOrganizationSchema, createWebSiteSchema } from "../lib/seo/schemas.js";
 
 const MOGU_AD_URL = "https://www.mogu.earth/offerings";
@@ -187,11 +186,43 @@ export default function Homepage({
 }) {
   const isMobile = useIsMobile();
 
-  const [randArray, setRandArray] = useState([0, 1, 2, 3, 4, 5, 6]);
-
-  const handleUpdate = (newNumbers) => {
-    setRandArray(newNumbers);
-  };
+  if (
+    !itemData ||
+    !featuredItems ||
+    !featuredArticle1 ||
+    !featuredArticle2 ||
+    !featuredArticle3 ||
+    !featuredArticle4 ||
+    !featuredArticle5 ||
+    !featuredArticle6 ||
+    !featuredArt1 ||
+    !featuredArt2 ||
+    !Blog1 ||
+    !Blog2 ||
+    !Blog3 ||
+    !instagramImages ||
+    instagramImages.length < 3 ||
+    !fromTheArchivesContent ||
+    fromTheArchivesContent.length < 6
+  ) {
+    return (
+      <>
+        <NextSeo
+          title="Home"
+          description="The Harvard Advocate homepage is temporarily unavailable."
+          canonical="https://theharvardadvocate.com"
+        />
+        <div css={homepageSx}>
+          <div className="horizontalContainer">
+            <div className="mainContent">
+              <h1>The Harvard Advocate</h1>
+              <p>Homepage content is temporarily unavailable. Please try again shortly.</p>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -230,7 +261,6 @@ export default function Homepage({
         <h1 style={{ position: 'absolute', left: '-10000px', top: 'auto', width: '1px', height: '1px', overflow: 'hidden' }}>
           The Harvard Advocate - America's Oldest College Literary Magazine
         </h1>
-        <RandomUpdate onUpdate={handleUpdate} maxLength={fromTheArchivesContent.length} />
 
         <div className="horizontalContainer">
           <div className="mainContent">
@@ -316,9 +346,9 @@ export default function Homepage({
               <div className="blogHeader">
                 <hr />
                 <h2 sx={{ variant: "styles.h2" }}>
-                  <div className="fontMod">
+                  <span className="fontMod">
                     <a href="sections/notes/">Notes from 21 South Street</a>
-                  </div>
+                  </span>
                 </h2>
                 <hr />
                 <p sx={{ variant: "styles.p" }}>
@@ -404,24 +434,24 @@ export default function Homepage({
               <div className="archiveHeader">
                 <hr />
                 <h2 sx={{ variant: "styles.h2" }}>
-                  <div className="fontMod">From the Archives</div>
+                  <span className="fontMod">From the Archives</span>
                 </h2>
                 <hr />
               </div>
               <TextContentList
                 items={[
-                  fromTheArchivesContent[randArray[0]],
-                  fromTheArchivesContent[randArray[1]],
-                  fromTheArchivesContent[randArray[2]],
+                  fromTheArchivesContent[0],
+                  fromTheArchivesContent[1],
+                  fromTheArchivesContent[2],
                 ]}
                 border={true}
                 home={true}
               ></TextContentList>
               <TextContentList
                 items={[
-                  fromTheArchivesContent[randArray[3]],
-                  fromTheArchivesContent[randArray[4]],
-                  fromTheArchivesContent[randArray[5]],
+                  fromTheArchivesContent[3],
+                  fromTheArchivesContent[4],
+                  fromTheArchivesContent[5],
                 ]}
                 border={false}
                 home={true}
@@ -436,36 +466,57 @@ export default function Homepage({
 }
 
 export async function getStaticProps() {
-  const data = await sanityClient.fetch(getResources);
+  try {
+    const data = await sanityClient.fetch(getResources);
 
-  const featuredItems = data.featuredItems.filter(
-    (item) => item.issue.title === data.itemData.title
-  );
+    const featuredItems = data.featuredItems.filter(
+      (item) => item.issue.title === data.itemData.title
+    );
 
-  // Shuffle archived content and take only 12 items for performance
-  // This reduces page data from ~11 MB to ~150 KB while maintaining randomness
-  const shuffledArchive = [...data.archivedContent]
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 12);
+    const archiveSelection = data.archivedContent.slice(0, 6);
 
-  return {
-    props: {
-      itemData: data.itemData,
-      featuredItems,
-      featuredArticle1: data.featuredArticle1,
-      featuredArticle2: data.featuredArticle2,
-      featuredArticle3: data.featuredArticle3,
-      featuredArticle4: data.featuredArticle4,
-      featuredArticle5: data.featuredArticle5,
-      featuredArticle6: data.featuredArticle6,
-      featuredArt1: data.featuredArt1,
-      featuredArt2: data.featuredArt2,
-      Blog1: data.blog1,
-      Blog2: data.blog2,
-      Blog3: data.blog3,
-      instagramImages: data.instagram,
-      fromTheArchivesContent: shuffledArchive,
-    },
-    revalidate: 86400, // Revalidate every 24 hours
-  };
+    return {
+      props: {
+        itemData: data.itemData,
+        featuredItems,
+        featuredArticle1: data.featuredArticle1,
+        featuredArticle2: data.featuredArticle2,
+        featuredArticle3: data.featuredArticle3,
+        featuredArticle4: data.featuredArticle4,
+        featuredArticle5: data.featuredArticle5,
+        featuredArticle6: data.featuredArticle6,
+        featuredArt1: data.featuredArt1,
+        featuredArt2: data.featuredArt2,
+        Blog1: data.blog1,
+        Blog2: data.blog2,
+        Blog3: data.blog3,
+        instagramImages: data.instagram,
+        fromTheArchivesContent: archiveSelection,
+      },
+      revalidate: 86400, // Revalidate every 24 hours
+    };
+  } catch (error) {
+    console.error("Failed to fetch homepage data from Sanity:", error);
+
+    return {
+      props: {
+        itemData: null,
+        featuredItems: [],
+        featuredArticle1: null,
+        featuredArticle2: null,
+        featuredArticle3: null,
+        featuredArticle4: null,
+        featuredArticle5: null,
+        featuredArticle6: null,
+        featuredArt1: null,
+        featuredArt2: null,
+        Blog1: null,
+        Blog2: null,
+        Blog3: null,
+        instagramImages: [],
+        fromTheArchivesContent: [],
+      },
+      revalidate: 300,
+    };
+  }
 }

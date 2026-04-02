@@ -129,7 +129,11 @@ const customComponents = {
     code: ({ children }) => <p sx={{ variant: "styles.p", lineHeight: 0.75 }}>{children}</p>,
   },
   marks: {
-    center: ({ children }) => <div className="centerText">{children}</div>,
+    center: ({ children }) => (
+      <span className="centerText" style={{ display: "block", textAlign: "center" }}>
+        {children}
+      </span>
+    ),
     sub: ({ children }) => <sub>{children}</sub>,
   },
   types: {
@@ -171,25 +175,22 @@ export default function TextListItem(props) {
             )}
             </h3>
             <h2 sx={{ variant: "styles.h2" }}>
-              <div className="fontMod">
+              <span className="fontMod">
                 <Link href={"/content/" + props.item.slug.current}>
                   {props.item.title}
                 </Link>
-              </div>
-
+              </span>
             </h2>
             <br />
-            <Link href={"/content/" + props.item.slug.current}>
-              <div className="textPreview">
-                {props.item.body && props.item.body.length > 0 && (
-                  <PortableText
-                    value={extractPreviewBlocks(props.item.body)}
-                    hardBreak={false}
-                    components={customComponents}
-                  />
-                )}
-              </div>
-            </Link>
+            <div className="textPreview">
+              {props.item.body && props.item.body.length > 0 && (
+                <PortableText
+                  value={extractPreviewBlocks(props.item.body)}
+                  hardBreak={false}
+                  components={customComponents}
+                />
+              )}
+            </div>
             <br />
             {props.hideAuthor ? (
               ""

@@ -88,7 +88,11 @@ const customComponents = {
   marks: {
     em: ({ children }) => <em>{children}</em>,
     strong: ({ children }) => <strong>{children}</strong>,
-    center: ({ children }) => <div className="centerText">{children}</div>,
+    center: ({ children }) => (
+      <span className="centerText" style={{ display: "block", textAlign: "center" }}>
+        {children}
+      </span>
+    ),
     link: ({ value, children }) => {
       const target = (value?.href || "").startsWith("http")
         ? "_blank"
@@ -228,7 +232,7 @@ export default function ContentItem({ itemData }) {
                   </Link>:
 
                   itemData.sections?.length > 0 ? (
-                    <div>
+                    <span>
                       <Link href={"/sections/" + itemData.sections[0].slug.current}>
                         {itemData.sections[0].title}
                       </Link>
@@ -240,7 +244,7 @@ export default function ContentItem({ itemData }) {
                           </Link>
                         </>
                       )}
-                    </div>
+                    </span>
                   ) : null
                 }
 
@@ -337,48 +341,69 @@ export default function ContentItem({ itemData }) {
 }
 
 export async function getStaticPaths() {
-  const slugs = await sanityClient.fetch(
-    `*[_type == "contentItem"].slug.current`
-  );
+  try {
+    const slugs = await sanityClient.fetch(
+      `*[_type == "contentItem"].slug.current`
+    );
 
-  const paths = slugs.map((slug) => ({
-    params: { slug },
-  }));
+    const paths = slugs.map((slug) => ({
+      params: { slug },
+    }));
 
-  return {
-    paths,
-    fallback: 'blocking',
-  };
+    return {
+      paths,
+      fallback: 'blocking',
+    };
+  } catch (error) {
+    console.error("Failed to fetch content item slugs from Sanity:", error);
+
+    return {
+      paths: [],
+      fallback: 'blocking',
+    };
+  }
 }
 
 export async function getStaticProps({ params }) {
-  const itemData = await sanityClient.fetch(
-    `*[slug.current == $slug]{
-      title,
-      slug,
-      mainImage{
-        asset->{
-          _id,
-          url
-         }
-       },
-     body,
-     publishedAt,
-     issue->{title, slug},
-     authors[]->{name, slug},
-     sections[]->{title, slug},
-     images[]{asset->{_id, url}},
-     vimeoLink
-   }[0]`,
-    { slug: params.slug }
-  );
+  try {
+    const itemData = await sanityClient.fetch(
+      `*[slug.current == $slug]{
+        title,
+        slug,
+        mainImage{
+          asset->{
+            _id,
+            url
+           }
+         },
+       body,
+       publishedAt,
+       issue->{title, slug},
+       authors[]->{name, slug},
+       sections[]->{title, slug},
+       images[]{asset->{_id, url}},
+       vimeoLink
+     }[0]`,
+      { slug: params.slug }
+    );
 
-  if (!itemData) {
-    return { notFound: true };
+    if (!itemData) {
+      return { notFound: true };
+    }
+
+    return {
+      props: { itemData },
+      revalidate: 86400,
+    };
+  } catch (error) {
+    console.error(
+      `Failed to fetch content item data for slug "${params.slug}":`,
+      error
+    );
+
+    return {
+      notFound: true,
+      revalidate: 300,
+    };
   }
-
-  return {
-    props: { itemData },
-    revalidate: 86400,
-  };
 }

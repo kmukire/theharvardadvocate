@@ -28,7 +28,7 @@ const getFeaturedArticle1 = `*[_type == "contentItem" && "featuresFeaturedTop" i
               authors[]->{name, slug},
               issue->{title, slug},
               slug,
-              body,
+              body[0...3],
               sections[]->{title, slug},
               mainImage{
                 asset->{
@@ -43,7 +43,7 @@ const getFeaturedArticle2 = `*[_type == "contentItem" && "poetryFeaturedTop" in 
                 authors[]->{name, slug},
                 issue->{title, slug},
                 slug,
-                body,
+                body[0...3],
                 sections[]->{title, slug},
                 mainImage{
                   asset->{
@@ -58,7 +58,7 @@ const getFeaturedArticle3 = `*[_type == "contentItem" && "fictionFeaturedTop" in
                 authors[]->{name, slug},
                 issue->{title, slug},
                 slug,
-                body,
+                body[0...3],
                 sections[]->{title, slug},
                 mainImage{
                   asset->{
@@ -73,7 +73,7 @@ const getFeaturedArticle4 = `*[_type == "contentItem" && "featuresFeaturedMiddle
                   authors[]->{name, slug},
                   issue->{title, slug},
                   slug,
-                  body,
+                  body[0...3],
                   sections[]->{title, slug},
                   mainImage{
                     asset->{
@@ -88,7 +88,7 @@ const getFeaturedArticle5 = `*[_type == "contentItem" && "poetryFeaturedBottom" 
                     authors[]->{name, slug},
                     issue->{title, slug},
                     slug,
-                    body,
+                    body[0...3],
                     sections[]->{title, slug},
                     mainImage{
                       asset->{
@@ -103,7 +103,7 @@ const getFeaturedArticle6 = `*[_type == "contentItem" && "fictionFeaturedBottom"
                       authors[]->{name, slug},
                       issue->{title, slug},
                       slug,
-                      body,
+                      body[0...3],
                       sections[]->{title, slug},
                       mainImage{
                         asset->{
@@ -118,7 +118,7 @@ const getFeaturedArt1 = `*[_type == "contentItem" && "artFeaturedMiddleRight" in
                       authors[]->{name, slug},
                       issue->{title, slug},
                       slug,
-                      body,
+                      body[0...3],
                       sections[]->{title, slug},
                       mainImage{
                         asset->{
@@ -133,7 +133,7 @@ const getFeaturedArt2 = `*[_type == "contentItem" && "artFeaturedBottomRight" in
                       authors[]->{name, slug},
                       issue->{title, slug},
                       slug,
-                      body,
+                      body[0...3],
                       sections[]->{title, slug},
                       mainImage{
                         asset->{
@@ -149,7 +149,7 @@ const getBlog1 = `*[_type == "contentItem" && "featuredBlog" in featuredOptions]
                     authors[]->{name, slug},
                     issue->{title, slug},
                     slug,
-                    body,
+                    body[0...3],
                     sections[]->{title, slug},
                     mainImage{
                       asset->{
@@ -165,7 +165,7 @@ const getBlog2 = `*[_type == "contentItem" && "featuredBlog" in featuredOptions]
                   authors[]->{name, slug},
                   issue->{title, slug},
                   slug,
-                  body,
+                  body[0...3],
                   sections[]->{title, slug},
                   mainImage{
                     asset->{
@@ -181,7 +181,7 @@ const getBlog3 = `*[_type == "contentItem" && "featuredBlog" in featuredOptions]
                 authors[]->{name, slug},
                 issue->{title, slug},
                 slug,
-                body,
+                body[0...3],
                 sections[]->{title, slug},
                 mainImage{
                   asset->{
@@ -207,7 +207,7 @@ const getArchivedContent = `*[_type == "contentItem" && ("Fiction" in sections[]
                       authors[]->{name, slug},
                       issue->{title, slug},
                       slug,
-                      body,
+                      body[0...3],
                       sections[]->{title, slug},
                   }`;
 
