@@ -94,6 +94,8 @@ function cleanBodyHtml(html = "") {
     .replace(/<a\b[^>]*>\s*<\/a>/gi, "")
     .replace(/<\/?div[^>]*>/gi, "")
     .replace(/<(p|div)[^>]*>\s*<\/\1>/gi, "")
+    .replace(/<p[^>]*>\s*(?:<br\s*\/?>|&nbsp;|\s)*<\/p>/gi, "")
+    .replace(/<p[^>]*>\s*(?:<br\s*\/?>\s*){2,}/gi, "<p>")
     .replace(/<\/?span[^>]*>/gi, "")
     .replace(/\s(?:class|style|id|width|height|frameborder|type|allowfullscreen|rel|title)="[^"]*"/gi, "")
     .replace(/https?:\/\/(?:www\.)?theharvardadvocate\.com\/blog\/post\/([^/"?#]+)\/?/gi, "/blog/post/$1")
@@ -101,6 +103,7 @@ function cleanBodyHtml(html = "") {
     .replace(/http:\/\/theadvocateblogdotnet\.files\.wordpress\.com\//gi, "https://theadvocateblogdotnet.files.wordpress.com/")
     .replace(/http:\/\/www\.youtube\.com\//gi, "https://www.youtube.com/")
     .replace(/href="\/?blog\/post\/([^"]+)"/gi, 'href="/blog/post/$1"')
+    .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
 
